@@ -10,7 +10,6 @@ class VectorDB:
         # Load Vectors
         if os.path.exists(self.vector_file_path):
             try:
-                # Load numpy file; allow_pickle is needed for dictionaries
                 self.vectors = np.load(self.vector_file_path, allow_pickle=True).item()
             except Exception as e:
                 print(f"Error loading vectors: {e}")
@@ -30,10 +29,7 @@ class VectorDB:
             self.metadata = {}
 
     def save(self):
-        # Save vectors as .npy
         np.save(self.vector_file_path, self.vectors)
-        
-        # Save metadata as .json
         with open(self.meta_file_path, 'w') as f:
             json.dump(self.metadata, f, indent=4)
         print("Database saved to disk.")

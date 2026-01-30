@@ -1,19 +1,15 @@
 import os
 import uuid
 from vector_db.storage import VectorDB
-from resnet import load_resnet18, image_to_embedding
+from embedding.resnet import load_resnet18, image_to_embedding
 from lsh.lsh import LSH
 from knn.brute_force import BruteForceSearch
 
 class ImageRetriever:
     def __init__(self, vector_db_path="data/vectors.npy", meta_db_path="data/metadata.json"):
-        # Initialize Components
         self.db = VectorDB(vector_db_path, meta_db_path)
         self.model = load_resnet18()
         self.bf_search = BruteForceSearch(metric="euclidean")
-        
-        # Initialize LSH (Dimension 512 for ResNet18)
-        # Using 10 bits (hyperplanes) and 2 hash tables for better recall
         self.lsh = LSH(dim=512, num_bits=10, num_tables=2)
         
         # Rebuild LSH index from existing DB data
@@ -36,7 +32,7 @@ class ImageRetriever:
             # Generate Embedding
             embedding = image_to_embedding(self.model, image_path)
             
-            # Generate Unique ID
+            # Generate ID
             img_id = str(uuid.uuid4())
             
             # Create Metadata
@@ -51,10 +47,7 @@ class ImageRetriever:
             
             # Save to disk
             self.db.save()
-            
-            # Update LSH Index
-            # In a real system, you might add incrementally, but here we re-index for simplicity
-            # self.refresh_lsh_index() 
+        
             return img_id
         except Exception as e:
             print(f"Failed to add image: {e}")
@@ -65,22 +58,20 @@ class ImageRetriever:
         Search for similar images.
         method: 'brute_force' or 'lsh'
         """
-        # 1. Convert Query Image to Vector
+        # 1 Convert Query Image to Vector
         query_vec = image_to_embedding(self.model, query_image_path)
 
-        # 2. Perform Search
+        # 2 Search
         results = []
         vectors = self.db.get_all_vectors()
 
         if method == "lsh":
-            # Ensure index is up to date
             self.lsh.index(vectors) 
             results = self.lsh.query(query_vec, vectors, k=k)
         else:
-            # Default to Brute Force
             results = self.bf_search.search(query_vec, vectors, k=k)
 
-        # 3. Enrich results with Metadata
+        # 3 Enrich results
         enriched_results = []
         for img_id, score in results:
             meta = self.db.get_metadata(img_id)
