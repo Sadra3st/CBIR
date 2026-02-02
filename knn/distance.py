@@ -1,14 +1,4 @@
 import numpy as np
-from knn.distance import euclidean, cosine, manhattan, dot
-
-
-DISTANCES = {
-    "euclidean": euclidean,
-    "cosine": cosine,
-    "manhattan": manhattan,
-    "dot": dot
-}
-
 
 def euclidean(a, b):
     return np.linalg.norm(a - b)
@@ -22,14 +12,20 @@ def manhattan(a, b):
 def dot(a, b):
     return -np.dot(a, b)
 
+DISTANCES = {
+    "euclidean": euclidean,
+    "cosine": cosine,
+    "manhattan": manhattan,
+    "dot": dot
+}
+
 
 def brute_force_knn(q_vector, vector_dict, k=5, metric="euclidean"):
     dis_fn = DISTANCES[metric]
     scores = []
-
-    for id, vec in vector_dict.item():
+    for id, vec in vector_dict.items():
         dis = dis_fn(q_vector, vec)
         scores.append((id, dis))
 
     scores.sort(key=lambda x: x[1])
-    return scores[:k] # time complexity: O(N × dis)
+    return scores[:k]  
