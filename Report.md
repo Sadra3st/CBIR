@@ -1,11 +1,17 @@
 # **Technical Performance Report: Content-Based Image Retrieval Using Locality Sensitive Hashing**
 
 **Project:** CBIR with Deep Embeddings and ANN Search  
+
 **Repository:** [https://github.com/MohammadDaeizadeh/CBIR](https://github.com/MohammadDaeizadeh/CBIR)
+
 **Date:** February 2026 
+
 **Author:** Mohammad Daeizadeh
+
 **Course:** Data Structures and Algorithms  
+
 **University:** Shahid Beheshti University (SBU)  
+
 **Instructor:** Dr. Ali Katanforoosh  
 
 ---
