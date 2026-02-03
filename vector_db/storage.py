@@ -11,7 +11,7 @@ class VectorDB:
         self.vector_file_path = vector_path
         self.meta_file_path = meta_path
         
-        # Load Vectors
+        # load vectors
         if os.path.exists(self.vector_file_path):
             try:
                 self.vectors = np.load(self.vector_file_path, allow_pickle=True).item()
@@ -21,7 +21,7 @@ class VectorDB:
         else:
             self.vectors = {}
 
-        # Load Metadata
+        # load metadata
         if os.path.exists(self.meta_file_path):
             try:
                 with open(self.meta_file_path, 'r') as f:

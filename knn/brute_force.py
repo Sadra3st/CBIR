@@ -19,14 +19,14 @@ class BruteForceSearch:
         """
         scores = []
 
-        # Iterate through all vectors in the database
+        # iterate through all vectors in the database
         for id, vec in db_vectors.items():
-            # Calculate distance
+            # calculate distance
             dist = self.distance_fn(query_vector, vec)
             scores.append((id, dist))
 
-        # Sort by distance (ascending)
+        # sort by distance (ascending)
         scores.sort(key=lambda x: x[1])
 
-        # Return top k
+        # return top k
         return scores[:k]

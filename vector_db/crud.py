@@ -21,33 +21,32 @@ class ImageRetriever:
         self.db = VectorDB(vector_db_path, meta_db_path)
         self.model = load_resnet18()
         
-        # Exact Search
+        # brute-forse(exacte search)
         self.bf_search = BruteForceSearch(metric="euclidean")
         
-        # LSH (Hash-Based)
+        # LSH(hash-based)
         self.lsh = LSH(dim=512, num_bits=6, num_tables=4, persistence_path="data/lsh_index")
         
-        # NSW (Graph-Based - Bonus)
+        # NSW(graph-based)
         self.nsw = NSWIndex(m=16, ef_construction=100)
         
-        # Annoy (Tree-Based - Bonus)
+        # Annoy(tree-based)
         self.annoy = AnnoyIndex(num_trees=15)
         
         self.indexes_ready = False
         self.indexing_status = "Initializing..."
 
-        # Start Index Building in Background
+        # start index building in background
         threading.Thread(target=self._async_startup, daemon=True).start()
 
     def _async_startup(self):
         with self.lock:
-            # Load LSH 
+            # load LSH 
             if len(self.db.get_all_vectors()) > 0:
                 self.indexing_status = "Loading LSH..."
                 if not self.lsh.hash_tables[0]:
                     self.refresh_indices(full_rebuild=False)
                 else:
-        
                     self.rebuild_memory_indexes()
             
             self.indexes_ready = True
@@ -62,7 +61,6 @@ class ImageRetriever:
             all_vectors = self.db.get_all_vectors()
             
             if all_vectors:
-                # LSH
                 if full_rebuild:
                     self.lsh.index(all_vectors)
                 self.nsw.build(all_vectors)
@@ -110,13 +108,9 @@ class ImageRetriever:
             with self.lock:
                 self.db.insert(img_id, embedding, meta)
                 self.db.save()
-                
                 self.lsh.add_vector(img_id, embedding)
                 self.lsh.save()
-                
-                # Update Bonus Indexes
                 self.nsw.add_item(img_id, embedding)
-                # Annoy doesn't support incremental easily, we skip or rebuild
         
             return img_id
         except Exception as e:
@@ -139,7 +133,6 @@ class ImageRetriever:
             print("Saving DB...")
             self.db.save()
             print("Building Indexes...")
-            # We call refresh synchronously here because import is a blocking op anyway
             self.refresh_indices()
             
         print("Batch import complete.")
@@ -181,7 +174,7 @@ class ImageRetriever:
     def search_by_vector(self, query_vec, k=5, method="brute_force"):
         results = []
         
-        # Guard against using not-ready indexes
+
         if method in ["nsw", "annoy"] and not self.indexes_ready:
             print("Warning: Advanced indexes not ready. Falling back to Brute Force.")
             method = "brute_force"
@@ -195,7 +188,7 @@ class ImageRetriever:
                 results = self.nsw.query(query_vec, k=k)
             elif method == "annoy":
                 results = self.annoy.query(query_vec, k=k)
-            else: # brute_force
+            else: # brute-force
                 results = self.bf_search.search(query_vec, vectors, k=k)
 
             enriched_results = []
@@ -244,13 +237,13 @@ class ImageRetriever:
             for q_id in query_ids:
                 query_vec = vectors[q_id]
                 
-                # 1. Ground Truth (Brute Force)
+                # ground truth (brute force)
                 t0 = time.time()
                 bf_res = self.bf_search.search(query_vec, vectors, k=k)
                 bf_time += (time.time() - t0)
                 ground_truth_ids = set([r[0] for r in bf_res])
                 
-                # 2. Test Approx Methods
+                # test approx methods
                 for m in methods:
                     t0 = time.time()
                     if m == "lsh": approx_res = self.lsh.query(query_vec, vectors, k=k)

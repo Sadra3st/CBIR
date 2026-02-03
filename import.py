@@ -5,7 +5,7 @@ import base64
 import io
 from PIL import Image
 
-# Ensure we can import from vector_db
+# ensure we can import from vector_db
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
@@ -16,13 +16,13 @@ except ImportError:
 
 def generate_thumbnail(path):
     """Try to load image from path and create base64 thumbnail"""
-    # Fix paths for current OS
+    # fix paths for current OS
     path = path.replace('\\', '/')
     
-    # Check if file exists relative to current script
+    # check if file exists relative to current script
     if not os.path.exists(path):
-        # Try stripping leading slash or folder if needed
-        # Assuming folder structure: current_dir/caltech101/...
+        # try stripping leading slash or folder if needed
+        # assuming folder structure: current_dir/caltech101/...
         if os.path.exists(os.path.join(".", path)):
             path = os.path.join(".", path)
         else:
@@ -65,13 +65,13 @@ def load_and_import():
     for i, raw_path in enumerate(image_paths):
         path_str = str(raw_path)
         
-        # 1. Generate Thumbnail
+        # generate thumbnail
         thumb, valid_path = generate_thumbnail(path_str)
         thumbnails.append(thumb)
         cleaned_paths.append(valid_path)
         
-        # 2. Extract Category
-        # Expected: caltech101/category/image.jpg
+        # extract category
+        # expected: caltech101/category/image.jpg
         parts = valid_path.replace('\\', '/').split('/')
         if len(parts) >= 2:
             categories.append(parts[-2])

@@ -90,7 +90,7 @@ class NSWIndex:
             if curr_dist > furthest_res_dist and len(results) >= ef:
                 break
                 
-            # Explore neighbors
+            # explore neighbors
             neighbors = self.graph.get(curr_id, [])
             for neighbor in neighbors:
                 if neighbor not in visited and neighbor in self.vectors:
@@ -98,12 +98,12 @@ class NSWIndex:
                     
                     dist = np.linalg.norm(query_vec - self.vectors[neighbor])
                     
-                    # If neighbor is better than worst result or we haven't filled ef
+                    # if neighbor is better than worst result or we haven't filled ef
                     if dist < furthest_res_dist or len(results) < ef:
                         heapq.heappush(candidates, (dist, neighbor))
                         heapq.heappush(results, (-dist, neighbor))
                         
-                        # Keep result set size <= ef
+                        # keep result set size <= ef
                         if len(results) > ef:
                             heapq.heappop(results)
                             furthest_res_dist = -results[0][0]
